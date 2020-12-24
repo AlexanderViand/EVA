@@ -37,7 +37,53 @@ public:
 
   auto getRotationKeys() {
     // Return the set of rotations needed
-    return keys_;
+    int max = 0;
+    for (int i : keys_) {
+      max = std::max(max, abs(i));
+    }
+    std::set<int> steps{};
+    for (int i = 1; i <= max; i <<= 1) {
+      steps.insert(i);
+      steps.insert(-i);
+    }
+    if (steps.size() < keys_.size()) {
+      return steps;
+    } else {
+      return keys_;
+    }
+    // For small_mnist_hw, this creates 24 keys, vs standard 31 via return keys_
+    // This is actually optimal for the required keys:
+    //  -2240    # **-2408** -256 +64
+    //  -1120    # **-1024** -128 + 32
+    //  -560     # **-512** -64 +16
+    //  -320     # **-256** -64
+    //  -160     # **-128** -32
+    //  -80      # -64 -16
+    //  -40      # -32 **-8**
+    //  -20      # -16 -4
+    //  -1       # **-1**
+    //   1       # **1**
+    //   2       # **2**
+    //   4       # **4**
+    //   8       # **8**
+    //   16      # **16**
+    //   20      # 16 + 4
+    //   28      # 16 + 8
+    //   29      # **32** **-4**
+    //   30      # 32 **-2**
+    //   40      # 32 + 8
+    //   56      # **64** + 8
+    //   57      # 64 + 8 + 1
+    //   58      # 64 + 8 + 2
+    //   60      # 64 -4
+    //   112     # **128** **-16**
+    //   114     # 128 - 16 + 2
+    //   116     # 128 - 16 + 4
+    //   224     # **256** **-32**
+    //   448     # **512**
+    //   560     # 512 **-64**
+    //   1120    # **1024** + 128 -32
+    //   2240    # **2408** + 256 -64
   }
 
 private:

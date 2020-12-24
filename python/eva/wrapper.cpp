@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "eva/eva.h"
 #include <cstdint>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "eva/eva.h"
 
 namespace py = pybind11;
 using namespace eva;
 using namespace std;
 
-const char* const SAVE_DOC_STRING = R"DELIMITER(Serialize and save an EVA object to a file.
+const char *const SAVE_DOC_STRING =
+    R"DELIMITER(Serialize and save an EVA object to a file.
 
 Parameters
 ----------
@@ -79,9 +80,9 @@ str
     .def("_make_term", &Program::makeTerm, py::keep_alive<0,1>())
     .def("_make_left_rotation", &Program::makeLeftRotation, py::keep_alive<0,1>())
     .def("_make_right_rotation", &Program::makeRightRotation, py::keep_alive<0,1>())
-    .def("_make_dense_constant", &Program::makeDenseConstant, py::keep_alive<0,1>())
-    .def("_make_uniform_constant", &Program::makeUniformConstant, py::keep_alive<0,1>())
-    .def("_make_input", &Program::makeInput, py::keep_alive<0,1>())
+    .def("_make_dense_constant", &Program::makeDenseConstant,py::arg("values"), py::arg("scale") = 0, py::keep_alive<0,1>())
+    .def("_make_uniform_constant", &Program::makeUniformConstant, py::arg("value"), py::arg("scale") = 0, py::keep_alive<0,1>())
+    .def("_make_input", &Program::makeInput, py::arg("name"), py::arg("type"), py::arg("scale") = 0, py::keep_alive<0,1>())
     .def("_make_output", &Program::makeOutput, py::keep_alive<0,1>());
 
   m.def("evaluate", &evaluate, R"DELIMITER(Evaluate the program without homomorphic encryption

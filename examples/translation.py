@@ -1,17 +1,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-from eva import Program, EvaProgram, Input, Output, evaluate, save, load, Type, Op, Term
+from eva.metric import valuation_mse
+
+import eva_pb2
+import known_type_pb2
+import vec_lang_pb2 as vl
+from eva import Program, evaluate, save, load, Type, Op
 from eva.ckks import CKKSCompiler
 from eva.seal import generate_keys
-from eva.metric import valuation_mse
-import numpy as np
-from google.protobuf.json_format import MessageToJson
-from google.protobuf import text_format
-from google.protobuf.any_pb2 import Any
-import known_type_pb2
-import eva_pb2
-import vec_lang_pb2 as vl
 
 
 def decode_eva(eva_file, text_file):
@@ -44,19 +41,16 @@ def translate_vec(name):
             elements = []
             for e in c.vec.elements:
                 elements.append(e)
-            obj_to_term[c.obj.id] = program._make_dense_constant(elements)
+            obj_to_term[c.obj.id] = program._make_dense_constant(elements, int(c.scale))
         elif c.type == vl.SCALAR_CONST:
-            obj_to_term[c.obj.id] = program._make_uniform_constant(c.vec.elements[-1])
+            obj_to_term[c.obj.id] = program._make_uniform_constant(c.vec.elements[-1], int(c.scale))
         else:
             print("Encountered unknown constant: " + str(c))
-        # TODO: Set scale for an individual thing  (requires extending wrapper.cpp?)
 
     # Translate inputs
     for i in vl_program.inputs:
         if i.type == vl.VECTOR_CIPHER:
-            obj_to_term[i.obj.id] = program._make_input('input_' + str(i.obj.id), Type.Cipher)
-            # TODO: Set scale for each input individually (requires extending wrapper.cpp?)
-            program.set_input_scales(int(i.scale))
+            obj_to_term[i.obj.id] = program._make_input('input_' + str(i.obj.id), Type.Cipher, int(i.scale))
         else:
             print("Unknown input type")
 
@@ -96,7 +90,6 @@ def translate_vec(name):
     # Translate outputs
     for i in vl_program.outputs:
         obj_to_term[i.obj.id] = program._make_output('output', obj_to_term[i.obj.id])
-        # TODO: Set scale for each output individually (requires extending wrapper.cpp?)
         program.set_output_ranges(int(i.scale))
 
     # Save pre-compile program

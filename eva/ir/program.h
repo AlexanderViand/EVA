@@ -45,23 +45,30 @@ public:
     return term;
   }
 
-  Term::Ptr makeConstant(std::unique_ptr<ConstantValue> value) {
+  Term::Ptr makeConstant(std::unique_ptr<ConstantValue> value, std::uint32_t scale = 0) {
     auto term = makeTerm(Op::Constant);
+    if (scale != 0) {
+      term->set<EncodeAtScaleAttribute>(scale);
+    }
     term->set<ConstantValueAttribute>(std::move(value));
     return term;
   }
 
-  Term::Ptr makeDenseConstant(std::vector<double> values) {
-    return makeConstant(std::make_unique<DenseConstantValue>(vecSize, values));
+  Term::Ptr makeDenseConstant(std::vector<double> values, std::uint32_t scale = 0) {
+    return makeConstant(std::make_unique<DenseConstantValue>(vecSize, values), scale);
   }
 
-  Term::Ptr makeUniformConstant(double value) {
-    return makeDenseConstant({value});
+  Term::Ptr makeUniformConstant(double value, std::uint32_t scale = 0) {
+    return makeDenseConstant({value}, scale);
   }
 
-  Term::Ptr makeInput(const std::string &name, Type type = Type::Cipher) {
+  Term::Ptr makeInput(const std::string &name, Type type = Type::Cipher,
+                      std::uint32_t scale = 0) {
     auto term = makeTerm(Op::Input);
     term->set<TypeAttribute>(type);
+    if (scale != 0) {
+      term->set<EncodeAtScaleAttribute>(scale);
+    }
     inputs.emplace(name, term);
     return term;
   }
