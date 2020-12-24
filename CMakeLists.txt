@@ -37,3 +37,4 @@ endif()
 
 add_subdirectory(eva)
 add_subdirectory(python)
+add_subdirectory(runtime)
