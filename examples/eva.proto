@@ -5,42 +5,119 @@ syntax = "proto3";
 
 package eva.msg;
 
-message Term {
-    uint32 op = 1;
-    // Absolute indices to list of terms
-    repeated uint64 operands = 2;
-    repeated Attribute attributes = 3;
-}
+// Instead of having enum OpCode in the proto language,
+// this now lives in eva/ir/ops.h
+//#define EVA_OPS
+//  X(Undef, 0)
+//  X(Input, 1)
+//  X(Output, 2)
+//  X(Constant, 3)
+//  X(Negate, 10)
+//  X(Add, 11)
+//  X(Sub, 12)
+//  X(Mul, 13)
+//  X(RotateLeftConst, 14)
+//  X(RotateRightConst, 15)
+//  X(Relinearize, 20)
+//  X(ModSwitch, 21)
+//  X(Rescale, 22)
+//  X(Encode, 23)
 
-message ConstantValue {
-    uint32 size = 1;
-    // If sparse_indices is set then values are interpreted as a sparse set of values
-    // Otherwise values is interpreted as dense with broadcasting semantics and size must divide vec_size
-    // If values is empty then the whole constant is zero
-    repeated double values = 2;
-    repeated uint32 sparse_indices = 3;
-}
 
+// Instead of encoding the ObjectType in the proto language, this is used:
 message Attribute {
-    uint32 key = 1;
-    oneof value {
-        uint32 uint32 = 2;
-        sint32 int32 = 3;
-        uint32 type = 4;
-        ConstantValue constant_value = 5;
-    }
+  uint32 key = 1; // from eva_serialization.cpp:   // Load the attribute key; this encodes the type of the attribute
+  oneof value {
+    uint32 uint32 = 2;
+    sint32 int32 = 3;
+    uint32 type = 4;
+    ConstantValue constant_value = 5;
+  }
+}
+// ATTRIBUTE KEYS CAN BE THE FOLLOWING:
+// #define EVA_ATTRIBUTES
+//  X(RescaleDivisorAttribute, std::uint32_t) (1)
+//  X(RotationAttribute, std::int32_t) (2)
+//  X(ConstantValueAttribute, std::shared_ptr<ConstantValue>) (3)
+//  X(TypeAttribute, Type) (4)
+//  X(RangeAttribute, std::uint32_t) (5)
+//  X(EncodeAtScaleAttribute, std::uint32_t) (6)
+//  X(EncodeAtLevelAttribute, std::uint32_t) (7)
+
+// Types are defined in eva/ir/types.h
+// #define EVA_TYPES
+//  X(Undef, 0)
+//  X(Cipher, 1)
+//  X(Raw, 2)
+//  X(Plain, 3)
+
+// Instead of different Object, Instruction, Input, Output and Vector terms
+// The new EVA language seems to have Term + Attributes
+// Also, from /eva/serialization/eva_serialization.cpp:
+// "Save all terms in topologically sorted order; this is convenient so we can
+//  easily load it back and set up operand pointers immediately after loading
+//  a term. To each term we assign a topological index (operands of each term
+//  have indices less than the index of the current term). The edges of the
+//  program graph are saved by providing the operand term indices for each term."
+// and
+//  "The terms were saved in topologically sorted order, so the operands of
+//   the current term were already loaded and their pointers are in the terms
+//   vector. Moreover, the serialized indices match the saving/loading order,
+//   i.e., the index in the terms vector."
+message Term {
+  uint32 op = 1;
+  // Absolute indices to list of terms
+  repeated uint64 operands = 2;
+  repeated Attribute attributes = 3;
 }
 
+// However, Constant Values seem to still be their own thing,
+// even though there is also a "Constant" Attribute
+message ConstantValue {
+  uint32 size = 1;
+  // If sparse_indices is set then values are interpreted as a sparse set of values
+  // Otherwise values is interpreted as dense with broadcasting semantics and size must divide vec_size
+  // If values is empty then the whole constant is zero
+  repeated double values = 2;
+  repeated uint32 sparse_indices = 3;
+}
+
+// Instead of NamedValues, we seem to have TermName
 message TermName {
-    uint64 term = 1;
-    string name = 2;
+  uint64 term = 1;
+  string name = 2;
 }
 
+// Program seems mostly the same, except that constants are no longer explicitly mentioned
 message Program {
-    uint32 ir_version = 1;
-    string name = 2;
-    uint32 vec_size = 3;
-    repeated Term terms = 4;
-    repeated TermName inputs = 5;
-    repeated TermName outputs = 6;
+  uint32 ir_version = 1;
+  string name = 2;
+  uint32 vec_size = 3;
+  repeated Term terms = 4;
+  repeated TermName inputs = 5;
+  repeated TermName outputs = 6;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
