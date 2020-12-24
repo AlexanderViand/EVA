@@ -1,0 +1,75 @@
+ir_version: 2
+vec_size: 1
+terms {                 // 0
+  op: 1                     // INPUT
+  attributes {
+    key: 4                  // TypeAttribute
+    type: 1                 // CIPHER
+  }
+  attributes {
+    key: 6                  // EncodeAtScaleAttribute
+    uint32: 77              // VALUE 77 (from set_input_scales)
+  }
+  attributes {
+    key: 7                  // EncodeAtLevelAttribute
+    uint32: 0               // VALUE 0
+  }
+}
+terms {                 // 1
+  op: 3                     // CONSTANT
+  attributes {
+    key: 3                  // ConstantValueAttribute
+    constant_value {
+      size: 1
+      values: 3.0           // VALUE 3.0
+    }
+  }
+  attributes {
+    key: 6                  // EncodeAtScaleAttribute
+    uint32: 77              // VALUE 77 (from set_input_scales)
+  }
+  attributes {
+    key: 7                  // EncodeAtLevelAttribute
+    uint32: 0               // VALUE 0
+  }
+}                       // 2
+terms {
+  op: 23                    // ENCODE
+  operands: 1               // -> TERM 1 (Constant Value 3)
+  attributes {
+    key: 6                  // EncodeAtScaleAttribute
+    uint32: 77              // VALUE 77 (from set_input_scales)
+  }
+  attributes {
+    key: 7                  // EncodeAtLevelAttribute
+    uint32: 0               // VALUE 0
+  }
+}
+terms {                 // 3
+  op: 13                    // MUL
+  operands: 2               // -> TERM 2 (Encoded Constant Value 3)
+  operands: 0               // -> TERM 1 (Input Cipher)
+}
+terms {                 // 4
+  op: 22                    // RESCALE
+  operands: 3               // -> TERM 3 (Product)
+  attributes {
+    key: 1                  // RescaleDivisorAttribute
+    uint32: 60              // VALUE 60 (rescale modulus)
+  }
+}
+terms {                 // 5
+  op: 2                     // OUTPUT
+  operands: 4               // -> TERM 4 (Rescaled Product)
+  attributes {
+    key: 5                  // RangeAttribute
+    uint32: 66              // VALUE 66 (from set_output_scales)
+  }
+}
+inputs {                // INPUTS
+  name: "x"                 // 'x' from Input(..)
+}
+outputs {               // OUTPUTS
+  term: 5               // -> TERM 5 (Output)
+  name: "y"             // 'y' from Output(..)
+}
